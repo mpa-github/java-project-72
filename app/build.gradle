@@ -40,5 +40,5 @@ test {
     //finalizedBy jacocoTestReport // report is always generated after tests run
 }
 
-task stage(dependsOn: ['clean', 'installDist'])
-installDist.mustRunAfter clean
+//task stage(dependsOn: ['clean', 'installDist'])
+//installDist.mustRunAfter clean
