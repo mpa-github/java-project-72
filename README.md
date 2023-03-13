@@ -13,9 +13,7 @@ Page Analyzer - a site that analyzes the specified pages for SEO suitability. <b
 ## Application Deployment
 ### PaaS Railway
 
-```sh
-https://java-project-72-production-baec.up.railway.app
-```
+<https://java-project-72-production-baec.up.railway.app>
 
 ## Unix
 ### Setup
