@@ -9,6 +9,7 @@ run: # Run app
 
 build: # Build app
 	./gradlew clean
+	./gradlew generateMigrations
 	./gradlew installDist
 
 test: # Run tests
@@ -19,3 +20,6 @@ lint: # Check code style
 
 test-report: # Check code coverage
 	./gradlew jacocoTestReport
+
+migration: # Generate migrations
+	./gradlew generateMigrations
