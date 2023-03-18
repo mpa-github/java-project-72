@@ -20,6 +20,7 @@ public class App {
             config.enableDevLogging();
             JavalinThymeleaf.configure(getTemplateEngine());
         });
+
         addRoutes(app);
 
         app.before(ctx -> {
@@ -39,12 +40,11 @@ public class App {
     }
 
     private static TemplateEngine getTemplateEngine() {
-        TemplateEngine templateEngine = new TemplateEngine();
-
         ClassLoaderTemplateResolver templateResolver = new ClassLoaderTemplateResolver();
         templateResolver.setPrefix("/templates/");
         templateResolver.setCharacterEncoding("UTF-8");
 
+        TemplateEngine templateEngine = new TemplateEngine();
         templateEngine.addTemplateResolver(templateResolver);
         templateEngine.addDialect(new LayoutDialect());
         templateEngine.addDialect(new Java8TimeDialect());
