@@ -6,6 +6,6 @@ public final class RootController {
 
     public static Handler helloWorld = ctx -> {
         //ctx.result("Hello World!");
-        ctx.render("index.html");
+        ctx.render("index1.html");
     };
 }
