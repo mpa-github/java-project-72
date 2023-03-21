@@ -8,7 +8,8 @@ datasource:
   production:
     username: ${JDBC_DATABASE_USERNAME}
     password: ${JDBC_DATABASE_PASSWORD}
-    url: "jdbc:${JDBC_DATABASE_URL}"
+    #url: "jdbc:${JDBC_DATABASE_URL}"
+    url: "jdbc:postgresql://${PGHOST}:${PGPORT}/{PGDATABASE}}"
 
 # (?) Укажите необходимость запуска миграций при старте сервера ebean <<< !!!
 ebean:
