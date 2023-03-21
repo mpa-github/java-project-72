@@ -8,7 +8,7 @@ datasource:
   production:
     username: ${JDBC_DATABASE_USERNAME}
     password: ${JDBC_DATABASE_PASSWORD}
-    url: ${JDBC_DATABASE_URL}
+    url: "jdbc:${JDBC_DATABASE_URL}"
 
 # (?) Укажите необходимость запуска миграций при старте сервера ebean <<< !!!
 ebean:
