@@ -4,8 +4,7 @@ import io.javalin.http.Handler;
 
 public final class RootController {
 
-    public static Handler helloWorld = ctx -> {
-        //ctx.result("Hello World!");
-        ctx.render("index1.html");
+    public static Handler rootPage = ctx -> {
+        ctx.render("index.html");
     };
 }

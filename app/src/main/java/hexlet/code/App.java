@@ -1,7 +1,9 @@
 package hexlet.code;
 
 import hexlet.code.controllers.RootController;
+import hexlet.code.controllers.UrlController;
 import io.javalin.Javalin;
+import io.javalin.apibuilder.ApiBuilder;
 import io.javalin.plugin.rendering.template.JavalinThymeleaf;
 import nz.net.ultraq.thymeleaf.layoutdialect.LayoutDialect;
 import org.thymeleaf.TemplateEngine;
@@ -15,9 +17,24 @@ public class App {
         app.start(getPort());
     }
 
+    private static int getPort() {
+        String port = System.getenv().getOrDefault("PORT", "5000");
+        return Integer.parseInt(port);
+    }
+
+    private static String getMode() {
+        return System.getenv().getOrDefault("APP_ENV", "development");
+    }
+
+    private static boolean isProduction() {
+        return getMode().equals("production");
+    }
+
     public static Javalin getApp() {
         Javalin app = Javalin.create(config -> {
-            config.enableDevLogging();
+            if (!isProduction()) {
+                config.enableDevLogging();
+            }
             config.enableWebjars();
             JavalinThymeleaf.configure(getTemplateEngine());
         });
@@ -31,13 +48,9 @@ public class App {
         return app;
     }
 
-    private static int getPort() {
-        String port = System.getenv().getOrDefault("PORT", "5000");
-        return Integer.parseInt(port);
-    }
-
     private static void addRoutes(Javalin app) {
-        app.get("/", RootController.helloWorld);
+        app.get("/", RootController.rootPage);
+        app.routes(() -> ApiBuilder.crud("/urls/{id}", new UrlController()));
     }
 
     private static TemplateEngine getTemplateEngine() {

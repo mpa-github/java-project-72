@@ -1,14 +1,6 @@
 # Настройки ORM
-#datasource:
-  # Задаём базу данных, к которой будет происходить подключение
-  #db:
-    #username: sa
-    #password: sa
-    #url: "jdbc:h2:./app_database"
-
-# Настройки ORM
 datasource:
-  #default: ${APP_ENV}
+  default: ${APP_ENV}
   development:
     username: sa
     password: sa
