@@ -33,7 +33,7 @@ dependencies {
     implementation 'org.slf4j:slf4j-simple:2.0.6'
 
     implementation 'com.h2database:h2:2.1.214'
-    implementation 'org.postgresql:postgresql:42.5.4'
+    implementation 'org.postgresql:postgresql:42.3.3'
 
     implementation 'org.thymeleaf:thymeleaf:3.0.15.RELEASE'
     implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect:3.2.0'
