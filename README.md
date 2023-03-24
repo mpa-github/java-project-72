@@ -21,3 +21,8 @@ Page Analyzer - a site that analyzes the specified pages for SEO suitability. <b
 ```sh
 make -C app build
 ```
+### Start
+
+```sh
+make -C app run
+```

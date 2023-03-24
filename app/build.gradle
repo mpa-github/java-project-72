@@ -46,7 +46,6 @@ dependencies {
     implementation 'io.ebean:ebean-ddl-generator:13.6.2'
     implementation 'io.ebean:ebean-migration:13.6.2'
     annotationProcessor 'io.ebean:querybean-generator:13.6.2'
-    testImplementation 'io.ebean:ebean-test:13.6.2'
 
     implementation 'org.glassfish.jaxb:jaxb-runtime:2.3.5'
     implementation 'javax.activation:activation:1.1.1'
@@ -54,6 +53,9 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
     testImplementation 'org.junit.jupiter:junit-jupiter-params:5.9.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.9.2'
+    testImplementation 'io.ebean:ebean-test:13.6.2'
+    testImplementation 'com.konghq:unirest-java:3.13.13'
 }
 
 test {

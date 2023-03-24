@@ -1,4 +1,4 @@
-# Настройки ORM
+# ORM Settings
 datasource:
   default: ${APP_ENV}
   development:
@@ -8,17 +8,10 @@ datasource:
   production:
     username: ${JDBC_DATABASE_USERNAME}
     password: ${JDBC_DATABASE_PASSWORD}
-    #url: "jdbc:${JDBC_DATABASE_URL}"
-    url: "jdbc:postgresql://${PGHOST}:${PGPORT}/${PGDATABASE}"
+    url: ${JDBC_DATABASE_URL}
+    #url: "jdbc:postgresql://${PGHOST}:${PGPORT}/${PGDATABASE}"
 
-# (?) Укажите необходимость запуска миграций при старте сервера ebean <<< !!!
+# Run database migrations on startup
 ebean:
-  #dbSchema: my_app  # use this schema rather than public
   migration:
-    run: true       # run database migrations on startup
-
-#ebean:
-  #test:
-    #platform: h2 # h2, postgres, mysql, mariadb, oracle, sqlserver, hana, clickhouse, sqlite
-    #ddlMode: dropCreate # none | dropCreate | migration
-    #dbName: my_app
+    run: true

@@ -1,3 +1,4 @@
+# Generate in memory H2 database for tests
 ebean:
   test:
     useDocker: false
