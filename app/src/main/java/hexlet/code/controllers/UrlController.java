@@ -108,12 +108,12 @@ public final class UrlController {
             String description = htmlParser.getMetaDescriptionContent();
             UrlCheck check = new UrlCheck(httpStatusCode, title, h1, description, existedUrl);
             check.save();
+            ctx.sessionAttribute("flash", "Страница успешно проверена");
+            ctx.sessionAttribute("flash-type", "success");
         } catch (UnirestException e) {
             ctx.sessionAttribute("flash", "Некорректный адрес");
             ctx.sessionAttribute("flash-type", "danger");
         }
-        ctx.sessionAttribute("flash", "Страница успешно проверена");
-        ctx.sessionAttribute("flash-type", "success");
         ctx.redirect("/urls/" + urlId); // ---> GET "/urls/{id}"
     };
 }
