@@ -10,7 +10,7 @@ datasource:
     password: ${JDBC_DATABASE_PASSWORD}
     url: ${JDBC_DATABASE_URL}
 
-# Run database migrations on startup
+# Run database migrations on startup (when the Ebean starts)
 ebean:
   migration:
     run: true
