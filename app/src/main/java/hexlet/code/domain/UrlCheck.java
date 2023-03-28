@@ -6,57 +6,73 @@ import io.ebean.annotation.WhenCreated;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Comparator;
-import java.util.List;
 
 @Entity
-public final class Url extends Model {
+public final class UrlCheck extends Model {
 
     @Id @Identity
     private long id;
 
-    private String name;
+    private int statusCode;
+
+    private String title;
+
+    private String h1;
+
+    @Lob
+    private String description;
 
     @WhenCreated
     private Instant createdAt;
 
-    @OneToMany(mappedBy = "url")
-    private List<UrlCheck> urlChecks;
+    @ManyToOne(optional = false)
+    private Url url;
 
-    public Url(String name) {
-        this.name = name;
+    public UrlCheck(int statusCode, String title, String h1, String description, Url url) {
+        this.statusCode = statusCode;
+        this.title = title;
+        this.h1 = h1;
+        this.description = description;
+        this.url = url;
     }
 
     public long getId() {
         return id;
     }
 
-    public String getName() {
-        return name;
+    public int getStatusCode() {
+        return statusCode;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getH1() {
+        return h1;
+    }
+
+    public String getDescription() {
+        return description;
     }
 
     public Instant getCreatedAt() {
         return createdAt;
     }
 
-    public List<UrlCheck> getUrlChecks() {
-        return urlChecks;
+    public Url getUrl() {
+        return url;
     }
 
     public String getFormattedCreatedAt() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
         LocalDateTime dateTime = LocalDateTime.ofInstant(this.createdAt, ZoneId.systemDefault());
         return dateTime.format(formatter);
-    }
-
-    public UrlCheck getLastCheck() {
-        return this.urlChecks.stream()
-            .max(Comparator.comparing(UrlCheck::getCreatedAt))
-            .orElse(null);
     }
 }

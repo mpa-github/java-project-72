@@ -3,7 +3,6 @@ package hexlet.code;
 import hexlet.code.controllers.RootController;
 import hexlet.code.controllers.UrlController;
 import io.javalin.Javalin;
-import io.javalin.apibuilder.ApiBuilder;
 import io.javalin.plugin.rendering.template.JavalinThymeleaf;
 import nz.net.ultraq.thymeleaf.layoutdialect.LayoutDialect;
 import org.thymeleaf.TemplateEngine;
@@ -50,7 +49,10 @@ public final class App {
 
     private static void addRoutes(Javalin app) {
         app.get("/", RootController.rootPage);
-        app.routes(() -> ApiBuilder.crud("/urls/{id}", new UrlController()));
+        app.get("/urls", UrlController.showAllUrls);
+        app.get("/urls/{id}", UrlController.showUrl);
+        app.post("/urls", UrlController.createUrl);
+        app.post("/urls/{id}/checks", UrlController.createUrlCheck);
     }
 
     private static TemplateEngine getTemplateEngine() {

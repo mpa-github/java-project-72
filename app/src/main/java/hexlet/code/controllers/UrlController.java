@@ -1,38 +1,78 @@
 package hexlet.code.controllers;
 
 import hexlet.code.domain.Url;
+import hexlet.code.domain.UrlCheck;
 import hexlet.code.domain.query.QUrl;
+import hexlet.code.utils.HtmlUtils;
 import hexlet.code.utils.UrlUtils;
-import io.javalin.apibuilder.CrudHandler;
-import io.javalin.http.Context;
-import org.jetbrains.annotations.NotNull;
+import io.javalin.http.Handler;
+import kong.unirest.HttpResponse;
+import kong.unirest.Unirest;
+import kong.unirest.UnirestException;
 
 import java.net.MalformedURLException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Comparator;
 import java.util.List;
 
-public class UrlController implements CrudHandler {
+public final class UrlController {
 
-    @Override // <--- POST "/urls"
-    public void create(@NotNull Context ctx) {
+    // <--- GET "/urls"
+    public static Handler showAllUrls = ctx -> {
+        List<Url> urls = new QUrl()
+            //.orderBy() // TODO .orderBy or sort (?)
+            //.id.asc()
+            .findList();
+
+        urls.sort(Comparator.comparing(Url::getId));
+        ctx.attribute("urls", urls);
+        ctx.render("urls/index.html");
+    };
+
+    // <--- GET /urls/{id}
+    public static Handler showUrl = ctx -> {
+        long urlId = ctx.pathParamAsClass("id", Long.class).getOrDefault(null);
+
+        Url existedUrl = new QUrl()
+            .id.equalTo(urlId)
+            .findOne();
+
+        // TODO should check this?
+        /*if (existedUrl == null) {
+            ctx.sessionAttribute("flash", "Страница не найдена");
+            ctx.sessionAttribute("flash-type", "danger");
+            ctx.render("index.html");
+            return;
+        }*/
+
+        if (existedUrl.getUrlChecks().size() > 1) {
+            existedUrl.getUrlChecks().sort(Comparator.comparing(UrlCheck::getCreatedAt).reversed());
+        }
+        LocalDateTime dateTime = LocalDateTime.ofInstant(existedUrl.getCreatedAt(), ZoneId.systemDefault());
+        ctx.attribute("url", existedUrl);
+        ctx.attribute("dateTime", dateTime);
+        ctx.render("urls/show.html");
+    };
+
+    // <--- POST "/urls"
+    public static Handler createUrl = ctx -> {
         String urlFullString = ctx.formParam("url");
         String url;
         try {
             url = UrlUtils.getMainUrlPart(urlFullString);
-        } catch (MalformedURLException ex) {
+        } catch (MalformedURLException e) {
             ctx.sessionAttribute("flash", "Некорректный URL");
             ctx.sessionAttribute("flash-type", "danger");
             ctx.sessionAttribute("incorrectUrl", urlFullString);
-            //ctx.attribute("incorrectUrl", urlFullString);
             ctx.redirect("/"); // ---> GET "/"
-            //ctx.render("index.html");
             return;
         }
 
         Url existedUrl = new QUrl()
             .name.equalTo(url)
             .findOne();
+
         if (existedUrl == null) {
             Url newUrl = new Url(url);
             newUrl.save();
@@ -43,38 +83,35 @@ public class UrlController implements CrudHandler {
             ctx.sessionAttribute("flash-type", "danger");
         }
         ctx.redirect("/urls"); // ---> GET "/urls"
-    }
+    };
 
-    @Override
-    public void delete(@NotNull Context ctx, @NotNull String id) {
+    // <--- POST "/urls/{id}/checks"
+    public static Handler createUrlCheck = ctx -> {
+        long urlId = ctx.pathParamAsClass("id", Long.class).getOrDefault(null);
 
-    }
-
-    @Override // <--- GET "/urls"
-    public void getAll(@NotNull Context ctx) {
-        List<Url> urls = new QUrl()
-            .orderBy()
-            .id.asc()
-            .findList();
-
-        ctx.attribute("urls", urls);
-        ctx.render("urls/index.html");
-    }
-
-    @Override // <--- GET /urls/{id}
-    public void getOne(@NotNull Context ctx, @NotNull String id) {
         Url existedUrl = new QUrl()
-            .id.equalTo(Integer.parseInt(id))
+            .id.equalTo(urlId)
             .findOne();
 
-        LocalDateTime dateTime = LocalDateTime.ofInstant(existedUrl.getCreatedAt(), ZoneId.systemDefault());
-        ctx.attribute("url", existedUrl);
-        ctx.attribute("createdAt", dateTime);
-        ctx.render("urls/show.html");
-    }
+        // TODO should check this?
+        /*if (existedUrl == null) {
+            ctx.render("index.html");
+            return;
+        }*/
 
-    @Override
-    public void update(@NotNull Context ctx, @NotNull String id) {
-
-    }
+        try {
+            HttpResponse<String> response = Unirest.get(existedUrl.getName()).asString();
+            HtmlUtils htmlParser = new HtmlUtils(response.getBody());
+            int httpStatusCode = response.getStatus();
+            String title = htmlParser.getTitleContent();
+            String h1 = htmlParser.getFirstH1TagContent();
+            String description = htmlParser.getMetaDescriptionContent();
+            UrlCheck check = new UrlCheck(httpStatusCode, title, h1, description, existedUrl);
+            check.save();
+        } catch (UnirestException e) {
+            ctx.sessionAttribute("flash", "Некорректный адрес");
+            ctx.sessionAttribute("flash-type", "danger");
+        }
+        ctx.redirect("/urls/" + urlId); // ---> GET "/urls/{id}"
+    };
 }
