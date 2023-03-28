@@ -4,7 +4,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
-public class HtmlUtils {
+public final class HtmlUtils {
 
     private String htmlPageContent;
     private Document document;

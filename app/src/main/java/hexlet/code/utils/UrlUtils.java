@@ -3,7 +3,7 @@ package hexlet.code.utils;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-public class UrlUtils {
+public final class UrlUtils {
 
     public static String getMainUrlPart(String urlFullString) throws MalformedURLException {
         URL url = new URL(urlFullString);
