@@ -1,4 +1,9 @@
-# ORM Settings
+## Run database migrations on startup (when the Ebean starts)
+ebean:
+  migration:
+    run: true
+
+## ORM Settings
 datasource:
   default: ${APP_ENV}
   development:
@@ -9,8 +14,3 @@ datasource:
     username: ${JDBC_DATABASE_USERNAME}
     password: ${JDBC_DATABASE_PASSWORD}
     url: ${JDBC_DATABASE_URL}
-
-# Run database migrations on startup (when the Ebean starts)
-ebean:
-  migration:
-    run: true

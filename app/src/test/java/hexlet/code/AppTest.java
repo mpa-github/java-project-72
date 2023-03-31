@@ -25,6 +25,7 @@ import java.nio.file.Paths;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 class AppTest {
 
@@ -32,12 +33,16 @@ class AppTest {
     private static String rootAppUrl;
     private static Database database;
     private static MockWebServer mockWebServer;
+    private static final String TEST_RESOURCES_PATH = "./src/test/resources/";
+    private static final String MOCK_INDEX_HTML = "mock-index.html";
     private static final String NEW_VALID_URL = "https://www.example.com";
     private static final String NEW_VALID_URL_WITH_PORT = "https://www.example.com:8080";
     private static final String GOOGLE_URL_IN_DB = "https://www.google.com";
     private static final String YANDEX_URL_IN_DB = "https://ya.ru";
-    private static final String INVALID_URL = "com";
-    private static final String TEST_RESOURCES_PATH = "./src/test/resources/";
+    private static final String UNAVAILABLE_URL_IN_DB = "https://com";
+    private static final int UNAVAILABLE_URL_ID = 3;
+    private static final int URLS_INIT_COUNT_IN_DB = 3;
+
 
     @BeforeAll
     public static void startTestApp() throws IOException {
@@ -50,7 +55,7 @@ class AppTest {
 
         mockWebServer = new MockWebServer();
         MockResponse mockResponse = new MockResponse()
-            .setBody(readMockHtmlFile("mock-index.html"))
+            .setBody(readMockHtmlFile(MOCK_INDEX_HTML))
             .setResponseCode(201);
         mockWebServer.enqueue(mockResponse);
         mockWebServer.start();
@@ -76,6 +81,7 @@ class AppTest {
             .asString();
 
         int expectedHttpCode = 302;
+
         assertEquals(expectedHttpCode, response.getStatus());
         assertEquals("/urls", response.getHeaders().getFirst("Location"));
 
@@ -106,6 +112,7 @@ class AppTest {
             .asString();
 
         int expectedHttpCode = 302;
+
         assertEquals(expectedHttpCode, response.getStatus());
         assertEquals("/urls", response.getHeaders().getFirst("Location"));
 
@@ -130,6 +137,7 @@ class AppTest {
         String htmlPageContent = response.getBody();
 
         int expectedHttpCode = 200;
+
         assertEquals(expectedHttpCode, response.getStatus());
         assertThat(htmlPageContent).contains(YANDEX_URL_IN_DB);
         assertThat(htmlPageContent).contains("Запустить проверку");
@@ -150,22 +158,24 @@ class AppTest {
     @Test
     void testCreateUrlCheck() {
         String mockUrl = mockWebServer.url("/").toString().replaceAll("/$", "");
+        int nextUrlId = URLS_INIT_COUNT_IN_DB + 1;
 
-        HttpResponse<String> response1 = Unirest
+        HttpResponse<String> mockResponse = Unirest
             .post(rootAppUrl + "/urls")
             .field("url", mockUrl)
             .asString();
 
         HttpResponse<String> response = Unirest
-            .post(rootAppUrl + "/urls/3/checks")
+            .post(rootAppUrl + "/urls/%d/checks".formatted(nextUrlId))
             .asString();
 
         int expectedHttpCode = 302;
+
         assertEquals(expectedHttpCode, response.getStatus());
-        assertEquals("/urls/3", response.getHeaders().getFirst("Location"));
+        assertEquals("/urls/%d".formatted(nextUrlId), response.getHeaders().getFirst("Location"));
 
         HttpResponse<String> responseAfterRedirect = Unirest
-            .get(rootAppUrl + "/urls/3")
+            .get(rootAppUrl + "/urls/%d".formatted(nextUrlId))
             .asString();
 
         int expectedHttpCodeAfterRedirect = 200;
@@ -173,9 +183,12 @@ class AppTest {
 
         assertEquals(expectedHttpCodeAfterRedirect, responseAfterRedirect.getStatus());
         assertThat(htmlPageContent).contains("ID");
-        assertThat(htmlPageContent).contains("1");
+        assertThat(htmlPageContent).contains(String.valueOf(nextUrlId));
         assertThat(htmlPageContent).contains("Код ответа");
         assertThat(htmlPageContent).contains("201");
+        assertThat(htmlPageContent).contains("MockTitle");
+        assertThat(htmlPageContent).contains("Mock Заголовок h1");
+        assertThat(htmlPageContent).contains("Mock description content");
 
         Url actualUrl = new QUrl()
             .name.equalTo(mockUrl)
@@ -187,6 +200,33 @@ class AppTest {
 
         assertNotNull(actualUrlCheck);
         assertEquals(mockUrl, actualUrlCheck.getUrl().getName());
+    }
+
+    @Test
+    void testCheckUnavailableUrl() {
+        HttpResponse<String> response = Unirest
+            .post(rootAppUrl + "/urls/%d/checks".formatted(UNAVAILABLE_URL_ID))
+            .asString();
+
+        UrlCheck actualUrlCheck = new QUrlCheck()
+            .url.id.equalTo(UNAVAILABLE_URL_ID)
+            .findOne();
+
+        assertNull(actualUrlCheck);
+
+        int expectedHttpCode = 302;
+
+        assertEquals(expectedHttpCode, response.getStatus());
+
+        HttpResponse<String> responseAfterRedirect = Unirest
+            .get(rootAppUrl + "/urls/%d".formatted(UNAVAILABLE_URL_ID))
+            .asString();
+
+        int expectedHttpCodeAfterRedirect = 200;
+        String htmlPageContent = responseAfterRedirect.getBody();
+
+        assertEquals(expectedHttpCodeAfterRedirect, responseAfterRedirect.getStatus());
+        assertThat(htmlPageContent).contains("Некорректный адрес");
     }
 
     @Test

@@ -3,8 +3,9 @@ package hexlet.code.controllers;
 import hexlet.code.domain.Url;
 import hexlet.code.domain.UrlCheck;
 import hexlet.code.domain.query.QUrl;
-import hexlet.code.utils.HtmlUtils;
+import hexlet.code.utils.HtmlParser;
 import hexlet.code.utils.UrlUtils;
+import io.ebean.PagedList;
 import io.javalin.http.Handler;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
@@ -15,17 +16,27 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.IntStream;
 
 public final class UrlController {
 
-    // <--- GET "/urls"
+    // <--- GET "/urls?page=value"
     public static Handler showAllUrls = ctx -> {
-        List<Url> urls = new QUrl()
-            //.orderBy() // TODO .orderBy or sort (?)
-            //.id.asc()
-            .findList();
+        int pageNumberToShow = ctx.queryParamAsClass("page", Integer.class).getOrDefault(1);
+        int rowsPerPage = 10;
+        int rowsOffset = (pageNumberToShow - 1) * rowsPerPage;
 
-        urls.sort(Comparator.comparing(Url::getId));
+        PagedList<Url> pagedUrls = new QUrl()
+            .setFirstRow(rowsOffset)
+            .setMaxRows(rowsPerPage)
+            .orderBy().id.asc()
+            .findPagedList();
+
+        List<Url> urls = pagedUrls.getList();
+        int totalRowsCount = pagedUrls.getTotalCount();
+        List<Integer> pageNumbers = getPageNumbers(totalRowsCount, rowsPerPage);
+        ctx.attribute("currentPage", pageNumberToShow);
+        ctx.attribute("pageNumbers", pageNumbers);
         ctx.attribute("urls", urls);
         ctx.render("urls/index.html");
     };
@@ -38,7 +49,7 @@ public final class UrlController {
             .id.equalTo(urlId)
             .findOne();
 
-        // TODO should check this?
+        // TODO should we check this?
         /*if (existedUrl == null) {
             ctx.sessionAttribute("flash", "Страница не найдена");
             ctx.sessionAttribute("flash-type", "danger");
@@ -93,15 +104,17 @@ public final class UrlController {
             .id.equalTo(urlId)
             .findOne();
 
-        // TODO should check this?
+        // TODO should we check this?
         /*if (existedUrl == null) {
+            ctx.sessionAttribute("flash", "Страница не найдена");
+            ctx.sessionAttribute("flash-type", "danger");
             ctx.render("index.html");
             return;
         }*/
 
         try {
             HttpResponse<String> response = Unirest.get(existedUrl.getName()).asString();
-            HtmlUtils htmlParser = new HtmlUtils(response.getBody());
+            HtmlParser htmlParser = new HtmlParser(response.getBody());
             int httpStatusCode = response.getStatus();
             String title = htmlParser.getTitleContent();
             String h1 = htmlParser.getFirstH1TagContent();
@@ -116,4 +129,16 @@ public final class UrlController {
         }
         ctx.redirect("/urls/" + urlId); // ---> GET "/urls/{id}"
     };
+
+    private static List<Integer> getPageNumbers(int totalItems, int itemsPerPage) {
+        int lastPageNumber;
+        if (totalItems % itemsPerPage == 0) {
+            lastPageNumber = totalItems / itemsPerPage;
+        } else {
+            lastPageNumber = (totalItems / itemsPerPage) + 1;
+        }
+        int startInclusive = 1;
+        int endExclusive = lastPageNumber + 1;
+        return IntStream.range(startInclusive, endExclusive).boxed().toList();
+    }
 }

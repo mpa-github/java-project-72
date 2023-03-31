@@ -4,13 +4,11 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
-public final class HtmlUtils {
+public final class HtmlParser {
 
-    private String htmlPageContent;
-    private Document document;
+    private final Document document;
 
-    public HtmlUtils(String htmlPageContent) {
-        this.htmlPageContent = htmlPageContent;
+    public HtmlParser(String htmlPageContent) {
         this.document = Jsoup.parse(htmlPageContent);
     }
 
