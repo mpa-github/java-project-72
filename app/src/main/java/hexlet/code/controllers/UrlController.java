@@ -50,7 +50,7 @@ public final class UrlController {
         if (existedUrl == null) {
             ctx.sessionAttribute("flash", "Страница не найдена");
             ctx.sessionAttribute("flash-type", "danger");
-            ctx.render("index.html");
+            ctx.redirect("/"); // ---> GET "/"
             return;
         }
 
