@@ -11,22 +11,11 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
 public final class App {
 
+    private static final String PORT_NUMBER = "5000";
+
     public static void main(String[] args) {
         Javalin app = getApp();
         app.start(getPort());
-    }
-
-    private static int getPort() {
-        String port = System.getenv().getOrDefault("PORT", "5000");
-        return Integer.parseInt(port);
-    }
-
-    private static String getMode() {
-        return System.getenv().getOrDefault("APP_ENV", "development");
-    }
-
-    private static boolean isProduction() {
-        return getMode().equals("production");
     }
 
     public static Javalin getApp() {
@@ -45,6 +34,19 @@ public final class App {
         });
 
         return app;
+    }
+
+    private static int getPort() {
+        String port = System.getenv().getOrDefault("PORT", PORT_NUMBER);
+        return Integer.parseInt(port);
+    }
+
+    private static String getMode() {
+        return System.getenv().getOrDefault("APP_ENV", "development");
+    }
+
+    private static boolean isProduction() {
+        return getMode().equals("production");
     }
 
     private static void addRoutes(Javalin app) {

@@ -12,8 +12,6 @@ import kong.unirest.Unirest;
 import kong.unirest.UnirestException;
 
 import java.net.MalformedURLException;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.IntStream;
@@ -49,20 +47,17 @@ public final class UrlController {
             .id.equalTo(urlId)
             .findOne();
 
-        // TODO should we check this?
-        /*if (existedUrl == null) {
+        if (existedUrl == null) {
             ctx.sessionAttribute("flash", "Страница не найдена");
             ctx.sessionAttribute("flash-type", "danger");
             ctx.render("index.html");
             return;
-        }*/
+        }
 
         if (existedUrl.getUrlChecks().size() > 1) {
             existedUrl.getUrlChecks().sort(Comparator.comparing(UrlCheck::getCreatedAt).reversed());
         }
-        LocalDateTime dateTime = LocalDateTime.ofInstant(existedUrl.getCreatedAt(), ZoneId.systemDefault());
         ctx.attribute("url", existedUrl);
-        ctx.attribute("dateTime", dateTime);
         ctx.render("urls/show.html");
     };
 
@@ -103,14 +98,6 @@ public final class UrlController {
         Url existedUrl = new QUrl()
             .id.equalTo(urlId)
             .findOne();
-
-        // TODO should we check this?
-        /*if (existedUrl == null) {
-            ctx.sessionAttribute("flash", "Страница не найдена");
-            ctx.sessionAttribute("flash-type", "danger");
-            ctx.render("index.html");
-            return;
-        }*/
 
         try {
             HttpResponse<String> response = Unirest.get(existedUrl.getName()).asString();
