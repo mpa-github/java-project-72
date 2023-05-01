@@ -11,9 +11,9 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
 public final class App {
 
-    private static final String PORT_NUMBER = "5000";
     private static final String DEVELOPMENT = "development";
     private static final String PRODUCTION = "production";
+    private static final String PORT_NUMBER = "5000";
 
     public static void main(String[] args) {
         Javalin app = getApp();
